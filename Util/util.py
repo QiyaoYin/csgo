@@ -3,6 +3,9 @@ import re
 from selenium.webdriver.support import expected_conditions as EC
 import requests
 from hyper.contrib import HTTP20Adapter
+import json
+import kdl
+
 # Constant = {
 #     'domain': 'https://buff.163.com/', # buff domain
 #     'ip_check_ab_addr': 'https://buff.163.com/', # the addr to check if ip works
@@ -12,6 +15,17 @@ from hyper.contrib import HTTP20Adapter
 # }
 def getProxy(ip):
     return {"http": ip, "https": ip}
+
+
+def checkAlive(proxies): # check if ip alive or dead
+    try:
+        current_time = time.time()
+        resp = requests.get(Constant.ip_check_addr, proxies)
+        lag = time.time() - current_time
+        # print(resp.status_code)
+        return (True, lag) if resp.status_code == 200 else (False, -1)
+    except:
+        return (False, -1)
 
 def getMilliTime():
     return str(round(time.time() * 1000))
@@ -28,6 +42,14 @@ class ConstantClass(object):
         self.account_availability_check_ab_addr = self.domain +  self.account_availability_check_re_addr# the addr to check the account if available or not
         
         self.notification_without_timestamp_addr = '/api/message/notification?_=' # the url for notification without time stamp
+        self.buy_goods_ab_addr = '/api/market/goods/buy' # the url for buying goods
+        self.buy_goods_re_addr = self.domain + self.buy_goods_ab_addr
+        self.game = 'csgo'
+        self.payment_method = '3'
+
+        self.buyer_cookie = 'Device-Id=xsTUySJ9cGu53kLrQSZ1; Locale-Supported=en; game=csgo; AQ_HD=1; YD_SC_SID=648A3875183F4E35BD18091330D767F0; NTES_YD_SESS=t7bms.vYLhVvaCFN32skR8TaYUCRXw_gT5R1p9JEpcN8uWdmu57zsxdQ4WMWvoFjhvoXl_9V9s9Vi3sUTUg5moN4uWCrtwRJ_UxWlTwyUeEwttUVwT84exPUo6snngfb_F8ttoJJLrE7xt1G5ie4bX1yqs2YjdN1k7Nz9Vq0eVU7PZOtWvnNxCjbSB6oLqvMVXWsccZsYgCPammAFQ3U2oaC8ahLgSHpSGHXMhhSCfM8b; S_INFO=1681823795|0|0&60##|17376591844; P_INFO=17376591844|1681823795|1|netease_buff|00&99|zhj&1681698222&netease_buff#zhj&330200#10#0#0|&0|null|17376591844; remember_me=U1106621510|9y79AjHgZ1VIOsP1dKK3uSq8uF6AIHKq; session=1-YWigjRpBmN4glrD9-skbnQqFVoUMbIIXMe3_xLf3vOEm2033920798; '
+        self.buyer_csrf_token = 'ImVlODc4M2Q0ZTlkMmM1NTAwZmFjM2UxMDY5MzRjOWUxOGVlNTJmNjci.FyApuw.feJ5IC1o7_5ZCqCBDPL6OOAULes'
+        self.dingding_mesasge_addr = "https://oapi.dingtalk.com/robot/send?access_token=35a63d6aae0234ee0e794b7f6cec9ec06a44cd89f42c6d9d336488730494f50c"
         
         self.buff_req_headers = { # request header for accessing market in buff
             ':authority': 'buff.163.com',
@@ -48,22 +70,78 @@ class ConstantClass(object):
         self.sessions.mount(self.domain, HTTP20Adapter())
         self.sessions.headers = self.buff_req_headers
 
+        self.auth = kdl.Auth("o81ooetpm0jqbtoauegq", "rc4cbfb9wslxolylje30wgj0q8yqzngz")
+        self.client = kdl.Client(self.auth, timeout=(8, 12), max_retries=3)
+        # https://github.com/kuaidaili/python-sdk/tree/master/api-sdk
+    
     def getGoodsAddr(self, goods_id, timestamp):
         return '/api/market/goods/sell_order?game=csgo&goods_id=' + goods_id + '&page_num=1&sort_by=price.asc&mode=&allow_tradable_cooldown=1&_=' + timestamp
 
 Constant = ConstantClass()
+# class WaitValueMatch(object):
+#     def __init__(self, locator, pattern):
+#         self.locator = locator
+#         self.pattern = re.compile(pattern)
 
-class WaitValueMatch(object):
-    def __init__(self, locator, pattern):
-        self.locator = locator
-        self.pattern = re.compile(pattern)
+#     def __call__(self, driver):
+#         try:
+#             element_text = EC._find_element(driver, self.locator).get_attribute('value')
+#             print(EC._find_element(driver, self.locator))
+#             print(element_text)
+#             return self.pattern.search(element_text)
+#         except Exception as e:
+#             print(e)
+#             return False
 
-    def __call__(self, driver):
-        try:
-            element_text = EC._find_element(driver, self.locator).get_attribute('value')
-            print(EC._find_element(driver, self.locator))
-            print(element_text)
-            return self.pattern.search(element_text)
-        except Exception as e:
-            print(e)
-            return False
+
+class BuyerAccount(object):
+    def __init__(self, csrf_token):
+        self.allow_tradable_cooldown = '0'
+        self.token = ''
+        self.cdkey_id = ''
+        self.cookie = Constant.buyer_cookie
+        self.csrf_token = self.notification(csrf_token).headers.get(b'set-cookie').decode("utf-8").split(';')[0].split('=')[1]
+
+    def notification(self, csrf_token):
+        _path = Constant.notification_without_timestamp_addr + getMilliTime()
+        _url = Constant.domain + _path
+        _header = {
+            ':method': 'GET',
+            ':path': _path,
+            'cookie': self.cookie + 'csrf_token=' + csrf_token,
+            'referer': Constant.domain + '/?game=csgo'
+        }
+        return Constant.sessions.get(_url, headers = _header)
+        
+    def buy_goods(self, goods_id, sell_order_id, price):
+        _header = {
+            ':method': 'POST',
+            ':path': Constant.buy_goods_ab_addr,
+            'referer': Constant.domain + '/goods/' + goods_id,
+            'content-type': 'application/json',
+            'origin': Constant.domain,
+            'cookie': self.cookie + 'csrf_token=' + self.csrf_token,
+            'x-csrftoken': self.csrf_token
+        }
+
+        form_data = {
+            "game": Constant.game,
+            "goods_id": goods_id,
+            "sell_order_id": sell_order_id,
+            "price": price,
+            "pay_method": Constant.payment_method,
+            "allow_tradable_cooldown": self.allow_tradable_cooldown,
+            "token": self.token,
+            "cdkey_id":self.cdkey_id
+        }
+
+        resp = Constant.sessions.post(Constant.buy_goods_re_addr, headers = _header, json = form_data)
+        self.csrf_token = self.notification(self.csrf_token).headers.get(b'set-cookie').decode("utf-8").split(';')[0].split('=')[1]
+        return resp.json()
+    
+    def sendMessage(self, price, message = 'jerryin add a new good in buff, price is '):
+        headers = {'Content-Type':'application/json'}
+        data = {"msgtype":"text","text":{ "content": message + price}}
+        requests.post(Constant.dingding_mesasge_addr, data = json.dumps(data), headers = headers)
+
+Buyer = BuyerAccount(Constant.buyer_csrf_token)

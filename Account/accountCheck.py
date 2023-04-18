@@ -1,7 +1,7 @@
 import sys
 sys.path.append("/home/jerryin/jupyter_proj/csgo/")
 
-from Util.util import Constant, WaitValueMatch
+from Util.util import Constant
 from Util import util
 import time
 import requests
@@ -19,7 +19,7 @@ import re
 class AccountPool(object):
     def __init__(self):
         self.raw_accounts = raw_accounts
-        self.ipPool = self.getCurrentIpPool()
+        self.ipPool = self.getSavedIpPool()
         self.accountPool = self.setAccountPool()
         self.saveIpAccountPool()
 
@@ -41,17 +41,18 @@ class AccountPool(object):
         acc_len = len(raw_accounts)
         print('account len: ' + str(acc_len))
         print('ip len: ' + str(ip_len))
+        if ip_len <= acc_len:
+            print('ip len is less then account len')
+        
         acc_ind = 0
         accountPool = []
         for ip_ind in range(0, ip_len):
             if(acc_ind >= acc_len):
                 break
-            if(not self.ipPool[ip_ind].is_alive):
-                continue
-            if(self.ipPool[ip_ind].is_used):
-                continue
-            self.ipPool[ip_ind].is_used = True
-            accountPool.append(Account(self.ipPool[ip_ind], raw_accounts[acc_ind]))
+
+            _ip = self.ipPool[0]
+            accountPool.append(Account(_ip, raw_accounts[acc_ind]))
+            self.ipPool.remove(self.ipPool[0])
             acc_ind += 1
         return accountPool
     
@@ -75,6 +76,11 @@ class Account(object):
         self.is_login, self.is_market = self.checkLoginAndMarket()
         # self.is_market = self.isMarketAvailable()
     
+    def relogin(self):
+        self.cookie, self.csrf_token = self.setCookieAndToken()
+        self.is_login, self.is_market = self.checkLoginAndMarket()
+
+
     def setCookieAndToken(self): # process cookie map to cookie str and token str
         cookie_map = self.getCookie()
         cookie = ''

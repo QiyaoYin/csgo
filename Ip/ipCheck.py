@@ -7,27 +7,21 @@ from Ip.rawIpPool import raw_ip_pool
 import time
 import requests
 import pickle
+import kdl
 
 class Ip(object): # one single ip object
-    def __init__(self, ip):
+    def __init__(self, ip, lag):
         self.ip = ip
         self.proxies = util.getProxy(self.ip)
-        self.is_alive = self.checkAlive()
+        # self.is_alive = self.checkAlive()
         self.check_time = time.time()
-        self.lag = 0
-        self.is_used = False
-        
-    def checkAlive(self): # check if ip alive or dead
-        current_time = time.time()
-        resp = requests.get(Constant.ip_check_addr, self.proxies)
-        self.lag = time.time() - current_time
-        print(resp.status_code)
-        return True if resp.status_code == 200 else False
+        self.lag = lag
+        # self.is_used = False
     
 class IpPool(object): # ip pool object
-    def __init__(self):
+    def __init__(self, ip_num):
         self.raw_ip_array = raw_ip_pool
-        self.ip_pool = self.getIpPool()
+        self.ip_pool = self.getIpPool(ip_num)
         self.saveIpPool(self.ip_pool)
     
     def __getitem__(self, index):
@@ -36,15 +30,45 @@ class IpPool(object): # ip pool object
     def __len__(self):
         return len(self.ip_pool)
 
-    def getIpPool(self):# store all ip objects into an array
-        ip_pool = []
-        for index in range(0, len(self.raw_ip_array)):
-            ip_pool.append(Ip(self.raw_ip_array[index]))
+    def getAnIp(self):
+        ip_pool = self.getIpPool(1)
+        _ip = ip_pool[0]
+        ip_pool.remove(_ip)
+        self.saveIpPool(ip_pool)
+        return _ip
+
+    def remove(self, ip):
+        self.ip_pool.remove(ip)
+    
+    def getIpPool(self, ip_num): # store all ip objects into an array
+        ip_pool = self.getIpPoolFromDisk()
+        ip_pool_len = len(ip_pool)
+        if(ip_pool_len >= ip_num):
+            return ip_pool
+        res_len = ip_num - ip_pool_len
+        new_ip_pool = Constant.client.get_dps(res_len, sign_type='hmacsha1', format='json')
+        res_len = len(new_ip_pool)
+        for i in range(0, res_len):
+            new_ip_pool[i] =  'http://' + new_ip_pool[i]
+        
+        # print(new_ip_pool)
+        
+        for index in range(0, res_len):
+            is_alive, lag_time = util.checkAlive(util.getProxy(new_ip_pool[index]))
+            if is_alive:
+                ip_pool.append(Ip(new_ip_pool[index], lag_time))
         return ip_pool
     
+    def getIpPoolFromDisk(self):
+        try:
+            with open(Constant.ip_pool_dir, 'rb') as fin: 
+                return pickle.load(fin)
+        except:
+            return []
+
     def saveIpPool(self, ip_pool): # save the array into a file called ipPool.pkl
         with open(Constant.ip_pool_dir, 'wb') as fout:
             pickle.dump(ip_pool, fout, pickle.HIGHEST_PROTOCOL)
 
 if __name__ == '__main__':
-    IpPool()
+    IpPool(30)
