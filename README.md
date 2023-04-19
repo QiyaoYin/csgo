@@ -1,6 +1,6 @@
 # csgo repository
 
-1. ip: 
+1. ip (no class): 
    1. getIps(num: int) -> ips: array
    2. checkAlive(ips) -> dict (ip: True or False) (using client.check_dps_valid(ips))
 2. account: (class: AccountPool(num) -> the account pool contains num accounts)

@@ -9,6 +9,15 @@ import requests
 import pickle
 import kdl
 
+
+def getIps(num: int) -> list:
+    return Constant.client.get_dps(num, sign_type='hmacsha1', format='json')
+
+def checkIpsAlive(ips: list) -> dict:
+    return Constant.client.check_dps_valid(ips)
+def checkIpAlive(ip: str) -> bool:
+    return Constant.client.check_dps_valid(ip)[ip]
+'''
 class Ip(object): # one single ip object
     def __init__(self, ip, lag):
         self.ip = ip
@@ -72,3 +81,4 @@ class IpPool(object): # ip pool object
 
 if __name__ == '__main__':
     IpPool(30)
+'''
