@@ -11,10 +11,20 @@ import kdl
 
 
 def getIps(num: int) -> list:
-    return Constant.client.get_dps(num, sign_type='hmacsha1', format='json')
+    ips = []
+    for i in range(0, num):
+        ips.append(getIp())
+    return ips
+
+def getIp() -> str:
+    ip = Constant.client.get_dps(1, sign_type='hmacsha1', format='json')[0]
+    while not checkIpAlive(ip):
+        ip = Constant.client.get_dps(1, sign_type='hmacsha1', format='json')[0]
+    return 'http://' + ip
 
 def checkIpsAlive(ips: list) -> dict:
     return Constant.client.check_dps_valid(ips)
+
 def checkIpAlive(ip: str) -> bool:
     return Constant.client.check_dps_valid(ip)[ip]
 '''

@@ -1,6 +1,7 @@
+import sys
+sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+
 import time
-import re
-from selenium.webdriver.support import expected_conditions as EC
 import requests
 from hyper.contrib import HTTP20Adapter
 import json
@@ -66,6 +67,7 @@ class ConstantClass(object):
             'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
             'x-requested-with': 'XMLHttpRequest'
         } 
+        
         self.sessions = requests.session() # the session for accessing buff
         self.sessions.mount(self.domain, HTTP20Adapter())
         self.sessions.headers = self.buff_req_headers
@@ -73,7 +75,10 @@ class ConstantClass(object):
         self.auth = kdl.Auth("o81ooetpm0jqbtoauegq", "rc4cbfb9wslxolylje30wgj0q8yqzngz")
         self.client = kdl.Client(self.auth, timeout=(8, 12), max_retries=3)
         # https://github.com/kuaidaili/python-sdk/tree/master/api-sdk
-    
+        
+        # self.goods_id = '45237'
+        # 命悬一线武器箱: 45237
+        self.goods = {'id': '45237', 'bar': 7.6}
     def getGoodsAddr(self, goods_id, timestamp):
         return '/api/market/goods/sell_order?game=csgo&goods_id=' + goods_id + '&page_num=1&sort_by=price.asc&mode=&allow_tradable_cooldown=1&_=' + timestamp
 

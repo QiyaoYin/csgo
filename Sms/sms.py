@@ -73,7 +73,7 @@ class Sms(object):
         addr = self.sms_release_addr + '&phone=' + phone
         return requests.get(addr).text
 
-    def blockPhone(self, phone):
+    def blockPhone(self, phone) -> str:
         '''
             block a defined phone number.
             phone: str. compulsory.
@@ -95,5 +95,4 @@ class Sms(object):
         addr = self.sms_send_addr + '&phone=' + phone + '&toPhone=' + toPhone + '&content=' + content
         return requests.get(addr).text
 
-if __name__ == '__main__':
-    Sms()
+sms = Sms()
