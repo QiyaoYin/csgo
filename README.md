@@ -22,5 +22,5 @@
 
 
 4. Others:
-   1. check ip address online: https://icanhazip.com/
+   1. check ip address online: https://icanhazip.com/   https://httpbin.org/ip
 tip: some threads will get the same lowest item, so if i need buy this item, should save this item id into a list first. avoiding the buyer account repost more than once.
