@@ -25,3 +25,7 @@
    1. check ip address online: https://icanhazip.com/   https://httpbin.org/ip
    2. session.post or session.get 和 post或get的区别：session可以保存cookie、headers等信息，保存连接信息；而post或get用完就销毁了，每次调用都要指定headers、cookies等通用信息。
 tip: some threads will get the same lowest item, so if i need buy this item, should save this item id into a list first. avoiding the buyer account repost more than once.
+
+
+
+5. use a main account buy items, and others just browse the lowest price items, and store the item id into like list, the main account iterate the list and buy the item one by one. -- update on 2024/09/17
