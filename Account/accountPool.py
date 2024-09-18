@@ -15,7 +15,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import re
 from Sms.sms import sms
-
+'''
+    如果其他类来使用这个【账号池】类， 只需要指定账号池中需要的账号个数， 例如：account = AccountPool(3), 指定3个账号。
+    这个类会先从磁盘中获取所有之前保存的账号(accountPool.pkl文件)，然后遍历磁盘中的账号池，留下有用的，删除没用的账号。
+    如果留下的账号达到了需要的账号数，例3个，则直接返回AccountPool类，否则加入新的账号。
+    新账号使用虚拟登录，手动登录。详见Account类的login方法。
+'''
 class AccountPool(object):
     '''
         methods:
@@ -31,12 +36,21 @@ class AccountPool(object):
         self.account_num = account_num
         
     def __getitem__(self, index):
+        '''
+            example: ccount = AccountPool(3)  account[1] return the 2nd account in the account_list.
+        '''
         return self.account_list[index]
     
     def __len__(self):
+        '''
+            example: account = AccountPool(3)  len(account) return 3.
+        '''
         return len(self.account_list)
 
     def getAccountsFromDisk(self) -> list:
+        '''
+            return the AccountPool class stored in the disk, example: accountPool.pkl
+        '''
         try:
             with open(Constant.account_pool_dir, 'rb') as fin: 
                 account_list = pickle.load(fin).account_list
@@ -47,14 +61,21 @@ class AccountPool(object):
             return []
             
     def updateAccountPool(self, account_list: list) -> None:
+        '''
+            update all accounts in the accountPool class, update to the login status.
+        '''
         for index in range(0, len(account_list)):
             time.sleep(1)
-            if index >= self.account_num:
+            if index >= self.account_num: 
+                '''
+                    if the number of required accounts <= the number of all accounts in the account pool, return the first self.account_num accounts.
+                    example: index = 5, self.account_num = 3, only return the first 3 accounts in the account list.
+                '''
                 self.account_list = account_list[:self.account_num]
                 return 
-            if not account_list[index].isIpAlive():
+            if not account_list[index].isIpAlive(): # if the ip is not alived, then update the ip.
                 account_list[index].updateIp()
-            status = account_list[index].accountStatus()
+            status = account_list[index].accountStatus() # check the account login status.
             if status == 0: # this account is logined
                 continue
             elif status == 1: # this account did not login
@@ -69,10 +90,13 @@ class AccountPool(object):
 
     
     def addNewAccounts(self, account_num: int) -> None:
+        '''
+            add new accounts into the account pool.
+        '''
         for index in range(0, account_num):
             account = Account()
             print('account status in addnewaccounts method: ' + str(account.status))
-            if account.status >= 0: 
+            if account.status >= 0: # if the account is logined, add this account into the pool, else index - 1 then get a new account.
                 self.account_list.append(account)
             else:
                 index -= 1
@@ -99,9 +123,15 @@ class Account(object):
             continue
     
     def isIpAlive(self) -> bool:
+        '''
+            check the ip banded with the account is alive or not.
+        '''
         return ip.checkIpAlive(self.ip.split('//')[1])
 
     def blockPhone(self) -> None:
+        '''
+            block the useless phone.
+        '''
         print('block phone: ' + self.phone + ' block message is: ' + sms.blockPhone(self.phone))
 
     def accountStatus(self) -> int:
@@ -129,7 +159,10 @@ class Account(object):
         else:
             return -1
     
-    def setCookieAndToken(self, cookieList: list) -> tuple: # process cookie map to cookie str and token str
+    def setCookieAndToken(self, cookieList: list) -> tuple: 
+        '''
+            process cookie map to cookie str and token str.
+        '''
         cookie_map = cookieList
         cookie = ''
         deviceId = ''
@@ -164,12 +197,27 @@ class Account(object):
         return cookie, csrf_token
 
     def updateIp(self) -> None:
+        '''
+            update the ip banded with this account.
+        '''
         self.ip = self.getIp()
 
     def getIp(self) -> str:
         return ip.getIp()
     
     def login(self) -> bool:
+        '''
+            login the new or expired account, return the bool type as success or not.
+            process:
+                1. open the page and click the login/register button.
+                2. wait 1.5s to open the login iframe page.
+                3. click 10 days no login and the agreement.
+                4. get the phone number and input into the phone input box automatically.
+                5. click the send sms button, and wait 5 sec for the HUMAN VERIFICATION. (DO IT BY SELF!!!)
+                6. if did not receive the sms after 45 sec, block the phone number and return false.
+                7. click the login button and wait maximum 30 sec to login and get the cookies.
+                8. check the account status, return true if logined or vice vera.
+        '''
         try:
             proxy = Proxy({
                 'proxyType': ProxyType.MANUAL,
