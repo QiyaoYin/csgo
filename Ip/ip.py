@@ -23,10 +23,33 @@ def getIp() -> str:
     return 'http://' + ip
 
 def checkIpsAlive(ips: list) -> dict:
-    return Constant.client.check_dps_valid(ips)
+    '''
+        ips: ip list, does not contain http://
+    '''
+    validity = Constant.client.check_dps_valid(ips)
+    return validity
 
-def checkIpAlive(ip: str) -> bool:
-    return Constant.client.check_dps_valid(ip)[ip]
+def checkIpAlive(ip: str) -> bool: 
+    '''
+        ip: 127.0.0.1
+    '''
+    validity =  Constant.client.check_dps_valid(ip)[ip]
+    proxyValid = checkProxy(ip)
+    return validity and proxyValid
+
+def checkProxy(ip: str) -> bool: # ip like 127.0.0.1
+    proxy = util.getProxy(ip)
+    
+    session = requests.session()
+    session.proxies.update(proxy)
+
+    response=session.get(Constant.ip_check_addr)
+    if response.text == ip: # response.text like 101.37.22.207
+        return True
+    return False
+    # print(response.text) # return 101.37.22.207
+# https://icanhazip.com/  https://httpbin.org/ip  https://api-bdc.net/data/client-ip
+
 '''
 class Ip(object): # one single ip object
     def __init__(self, ip, lag):

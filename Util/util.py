@@ -33,8 +33,10 @@ def getMilliTime():
 
 class ConstantClass(object):
     def __init__(self):
+        # self.ip_check_addr
+
         self.domain = 'https://buff.163.com' # buff domain
-        self.ip_check_addr = 'https://buff.163.com' # the addr to check if ip works
+        self.ip_check_addr = 'https://icanhazip.com/' # the addr to check if ip works
         self.home_dir = '/home/jerryin/jupyter_proj/csgo/' # the root addr 
         self.ip_pool_dir = self.home_dir + 'Ip/ipPool.pkl' # the file address compared to 'the absolute root addr'
         self.account_pool_dir = self.home_dir + 'Account/accountPool.pkl' # the file address compared to 'the absolute root addr'

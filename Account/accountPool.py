@@ -219,19 +219,38 @@ class Account(object):
                 8. check the account status, return true if logined or vice vera.
         '''
         try:
-            proxy = Proxy({
-                'proxyType': ProxyType.MANUAL,
-                'httpProxy': self.ip,
-                'sslProxy': self.ip,
-                'noProxy': ''
-            })
+            # proxy = Proxy({
+            #     'proxyType': ProxyType.MANUAL,
+            #     'httpProxy': self.ip,
+            #     'sslProxy': self.ip,
+            #     'noProxy': ''
+            # })
+            # options.proxy = proxy
 
             options =  webdriver.ChromeOptions()
-            options.proxy = proxy
+
             options.add_experimental_option("detach", True) # make the chrome window always opened
+            
+            
+            while True: # get the useful ip
+                options.add_argument(f"--proxy-server={self.ip}")
+                driver = webdriver.Chrome(options = options)
+                driver.get(Constant.ip_check_addr)
+                try:
+                    return_ip_addr = driver.find_element_by_tag_name('pre') # return 101.37.22.207
+                    if return_ip_addr.text == self.ip:
+                        print('IP ' + self.ip + 'can be use' + '\n')
+                        driver.close()
+                        break
+                except BaseException as e:
+                    driver.close()
+                    options.arguments.remove(f"--proxy-server={self.ip}")
+                    self.updateIp()
+                    continue
+            
+            
             driver = webdriver.Chrome(options = options)
-            
-            
+
             driver.get(Constant.domain)
             try:
                 driver.find_element_by_xpath('//div[@class="nav nav_entries"]/ul/li/a[@onclick="loginModule.showLogin()"]').click() # click login/register button
