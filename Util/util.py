@@ -81,9 +81,15 @@ class ConstantClass(object):
         # self.goods_id = '45237'
         # 命悬一线武器箱: 45237
         self.goods = {'id': '45237', 'bar': 7.6}
-    def getGoodsAddr(self, goods_id, timestamp):
+    def getGoodsAddr(self, goods_id, timestamp) -> str:
         return '/api/market/goods/sell_order?game=csgo&goods_id=' + goods_id + '&page_num=1&sort_by=price.asc&mode=&allow_tradable_cooldown=1&_=' + timestamp
 
+    def getSession(self) -> object:
+        session = requests.session()
+        session.mount(self.domain, HTTP20Adapter())
+        session.headers = self.buff_req_headers
+        return session
+    
 Constant = ConstantClass()
 # class WaitValueMatch(object):
 #     def __init__(self, locator, pattern):
