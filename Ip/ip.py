@@ -20,7 +20,7 @@ def getIp() -> str:
     ip = Constant.client.get_dps(1, sign_type='hmacsha1', format='json')[0]
     while not checkIpAlive(ip):
         ip = Constant.client.get_dps(1, sign_type='hmacsha1', format='json')[0]
-    return 'http://' + ip
+    return ip
 
 def checkIpsAlive(ips: list) -> dict:
     '''

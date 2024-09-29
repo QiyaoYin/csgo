@@ -14,22 +14,6 @@ import kdl
 #     'ip_pool_rel_dir': 'Ip/ipPool.pkl', # the relative file address compared to 'the absolute root addr'
 #     'account_availability_check_rel_addr': 'api/market/goods?game=csgo&page_num=1&use_suggestion=0&_=' # the relative addr to check the account if available or not
 # }
-def getProxy(ip):
-    return {"http": ip, "https": ip}
-
-
-def checkAlive(proxies): # check if ip alive or dead
-    try:
-        current_time = time.time()
-        resp = requests.get(Constant.ip_check_addr, proxies)
-        lag = time.time() - current_time
-        # print(resp.status_code)
-        return (True, lag) if resp.status_code == 200 else (False, -1)
-    except:
-        return (False, -1)
-
-def getMilliTime():
-    return str(round(time.time() * 1000))
 
 class ConstantClass(object):
     def __init__(self):
@@ -40,9 +24,13 @@ class ConstantClass(object):
         self.home_dir = '/home/jerryin/jupyter_proj/csgo/' # the root addr 
         self.ip_pool_dir = self.home_dir + 'Ip/ipPool.pkl' # the file address compared to 'the absolute root addr'
         self.account_pool_dir = self.home_dir + 'Account/accountPool.pkl' # the file address compared to 'the absolute root addr'
-        
-        self.account_availability_check_re_addr = '/api/market/goods?game=csgo&page_num=1&category=csgo_type_weaponcase&use_suggestion=0&_=' + getMilliTime()
-        self.account_availability_check_ab_addr = self.domain +  self.account_availability_check_re_addr# the addr to check the account if available or not
+        self.all_buyers_dir = self.home_dir + 'Account/Buyer/allBuyers.pkl' # the file is an instance, stored all buyer accounts.
+        self.buyer_list_dir = self.home_dir + 'Account/Buyer/buyerList.csv' # the csv stored all useful buyer account info.
+        self.disabled_buyer_list_dir = self.home_dir + 'Account/Buyer/disabledBuyerList.csv' # the csv stored all disabled buyer account info.
+        self.new_account_list_dir = self.home_dir + 'Account/Buyer/newAccount.csv' # the csv stored new account which does not used.
+
+        self.account_availability_check_re_addr = '/api/market/goods?game=csgo&page_num=1&category=csgo_type_weaponcase&use_suggestion=0&_=' + self.getMilliTime()
+        self.account_availability_check_ab_addr = self.domain +  self.account_availability_check_re_addr # the addr to check the account if available or not
         
         self.notification_without_timestamp_addr = '/api/message/notification?_=' # the url for notification without time stamp
         self.buy_goods_ab_addr = '/api/market/goods/buy' # the url for buying goods
@@ -70,9 +58,9 @@ class ConstantClass(object):
             'x-requested-with': 'XMLHttpRequest'
         }
         
-        self.sessions = requests.session() # the session for accessing buff
-        self.sessions.mount(self.domain, HTTP20Adapter())
-        self.sessions.headers = self.buff_req_headers
+        # self.sessions = requests.session() # the session for accessing buff
+        # self.sessions.mount(self.domain, HTTP20Adapter())
+        # self.sessions.headers = self.buff_req_headers
 
         self.auth = kdl.Auth("o81ooetpm0jqbtoauegq", "rc4cbfb9wslxolylje30wgj0q8yqzngz")
         self.client = kdl.Client(self.auth, timeout=(8, 12), max_retries=3)
@@ -90,6 +78,23 @@ class ConstantClass(object):
         session.headers = self.buff_req_headers
         return session
     
+    def getProxy(self,ip) -> dict:
+        return {"http": "http://" + ip, "https": "http://" + ip}
+
+    def checkAlive(self, proxies) -> tuple: # check if ip alive or dead
+        try:
+            current_time = time.time()
+            resp = requests.get(self.ip_check_addr, proxies)
+            lag = time.time() - current_time
+            # print(resp.status_code)
+            return (True, lag) if resp.status_code == 200 else (False, -1)
+        except:
+            return (False, -1)
+
+    def getMilliTime(self) -> str:
+        return str(round(time.time() * 1000))
+
+
 Constant = ConstantClass()
 # class WaitValueMatch(object):
 #     def __init__(self, locator, pattern):
@@ -116,7 +121,7 @@ class BuyerAccount(object):
         self.csrf_token = self.notification(csrf_token).headers.get(b'set-cookie').decode("utf-8").split(';')[0].split('=')[1]
 
     def notification(self, csrf_token):
-        _path = Constant.notification_without_timestamp_addr + getMilliTime()
+        _path = Constant.notification_without_timestamp_addr + Constant.getMilliTime()
         _url = Constant.domain + _path
         _header = {
             ':method': 'GET',
@@ -124,7 +129,7 @@ class BuyerAccount(object):
             'cookie': self.cookie + 'csrf_token=' + csrf_token,
             'referer': Constant.domain + '/?game=csgo'
         }
-        return Constant.sessions.get(_url, headers = _header)
+        return Constant.getSession().get(_url, headers = _header)
         
     def buy_goods(self, goods_id, sell_order_id, price):
         _header = {
