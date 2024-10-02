@@ -6,7 +6,7 @@ import requests
 from hyper.contrib import HTTP20Adapter
 import json
 import kdl
-
+from Account.Buyer import BuyerList
 # Constant = {
 #     'domain': 'https://buff.163.com/', # buff domain
 #     'ip_check_ab_addr': 'https://buff.163.com/', # the addr to check if ip works
@@ -25,9 +25,9 @@ class ConstantClass(object):
         self.ip_pool_dir = self.home_dir + 'Ip/ipPool.pkl' # the file address compared to 'the absolute root addr'
         self.account_pool_dir = self.home_dir + 'Account/accountPool.pkl' # the file address compared to 'the absolute root addr'
         self.all_buyers_dir = self.home_dir + 'Account/Buyer/allBuyers.pkl' # the file is an instance, stored all buyer accounts.
-        self.buyer_list_dir = self.home_dir + 'Account/Buyer/buyerList.csv' # the csv stored all useful buyer account info.
-        self.disabled_buyer_list_dir = self.home_dir + 'Account/Buyer/disabledBuyerList.csv' # the csv stored all disabled buyer account info.
-        self.new_account_list_dir = self.home_dir + 'Account/Buyer/newAccount.csv' # the csv stored new account which does not used.
+        self.buyer_list_dir = self.home_dir + 'Account/Buyer/List/buyerList.csv' # the csv stored all useful buyer account info.
+        self.disabled_buyer_list_dir = self.home_dir + 'Account/Buyer/List/disabledBuyerList.csv' # the csv stored all disabled buyer account info.
+        self.new_account_list_dir = self.home_dir + 'Account/Buyer/List/newAccount.csv' # the csv stored new account which does not used.
 
         self.account_availability_check_re_addr = '/api/market/goods?game=csgo&page_num=1&category=csgo_type_weaponcase&use_suggestion=0&_=' + self.getMilliTime()
         self.account_availability_check_ab_addr = self.domain +  self.account_availability_check_re_addr # the addr to check the account if available or not
@@ -57,10 +57,12 @@ class ConstantClass(object):
             'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
             'x-requested-with': 'XMLHttpRequest'
         }
-        
+    
         # self.sessions = requests.session() # the session for accessing buff
         # self.sessions.mount(self.domain, HTTP20Adapter())
         # self.sessions.headers = self.buff_req_headers
+
+        self.buyerList = BuyerList()
 
         self.auth = kdl.Auth("o81ooetpm0jqbtoauegq", "rc4cbfb9wslxolylje30wgj0q8yqzngz")
         self.client = kdl.Client(self.auth, timeout=(8, 12), max_retries=3)
