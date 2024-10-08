@@ -6,7 +6,6 @@ import requests
 from hyper.contrib import HTTP20Adapter
 import json
 import kdl
-from Account.Buyer import BuyerList
 # Constant = {
 #     'domain': 'https://buff.163.com/', # buff domain
 #     'ip_check_ab_addr': 'https://buff.163.com/', # the addr to check if ip works
@@ -61,8 +60,6 @@ class ConstantClass(object):
         # self.sessions = requests.session() # the session for accessing buff
         # self.sessions.mount(self.domain, HTTP20Adapter())
         # self.sessions.headers = self.buff_req_headers
-
-        self.buyerList = BuyerList()
 
         self.auth = kdl.Auth("o81ooetpm0jqbtoauegq", "rc4cbfb9wslxolylje30wgj0q8yqzngz")
         self.client = kdl.Client(self.auth, timeout=(8, 12), max_retries=3)

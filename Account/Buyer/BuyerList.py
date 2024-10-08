@@ -7,7 +7,7 @@ from Util.util import Constant
 这个类的作用是保存最新可用的buyer账号和不可用的buyer账号。
 若在过程中发现某个buyer账号不可用，则需调用diableAccount方法来更新。
 '''
-class Buyers(object):
+class BuyerList(object):
     '''
         buyer = Buyer()会做以下动作：
             1. 读取newAccount.csv中的所有新账号，保存至buyerlist.csv中并删除newAccount.csv中的所有新账号。
@@ -111,5 +111,5 @@ class Buyers(object):
         return self.buyerList
     
 
-if __name__ == '__main__':
-    buyer = Buyers()
+
+buyerlist = BuyerList()

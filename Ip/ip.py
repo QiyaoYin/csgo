@@ -20,33 +20,39 @@ def getIp() -> str:
     ip = Constant.client.get_dps(1, sign_type='hmacsha1', format='json')[0]
     while not checkIpAlive(ip):
         ip = Constant.client.get_dps(1, sign_type='hmacsha1', format='json')[0]
-    return ip
+    # return ip
+    return '139.9.119.20:80'
 
 def checkIpsAlive(ips: list) -> dict:
     '''
-        ips: ip list, does not contain http://
+        ips: ip list, does not contain http:
     '''
-    validity = Constant.client.check_dps_valid(ips)
-    return validity
+    # validity = Constant.client.check_dps_valid(ips)
+    # return validity
+    return True
 
 def checkIpAlive(ip: str) -> bool: 
     '''
-        ip: 127.0.0.1
+        ip: 127.0.0.1:8080
     '''
-    validity =  Constant.client.check_dps_valid(ip)[ip]
+    # validity =  Constant.client.check_dps_valid(ip)[ip]
     proxyValid = checkProxy(ip)
-    return validity and proxyValid
+    # return validity and proxyValid
+    return proxyValid
 
-def checkProxy(ip: str) -> bool: # ip like 127.0.0.1
-    proxy = util.getProxy(ip)
-    
-    session = requests.session()
-    session.proxies.update(proxy)
+def checkProxy(ip: str) -> bool: # ip like 127.0.0.1:8080
+    try:
+        proxy = Constant.getProxy(ip)
+        
+        session = requests.session()
+        session.proxies.update(proxy)
 
-    response=session.get(Constant.ip_check_addr)
-    if response.text == ip: # response.text like 101.37.22.207
-        return True
-    return False
+        response = session.get(Constant.ip_check_addr)
+        if response.text.replace('\n','').replace('\r','') == ip.split(":")[0]: # response.text like 101.37.22.207
+            return True
+        return False
+    except:
+        return False
     # print(response.text) # return 101.37.22.207
 # https://icanhazip.com/  https://httpbin.org/ip  https://api-bdc.net/data/client-ip
 
