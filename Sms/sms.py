@@ -1,5 +1,6 @@
 import sys
-sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+# sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+sys.path.append("../")
 
 from Util.util import Constant
 import requests
@@ -8,7 +9,7 @@ class Sms(object):
     def __init__(self):
         self.username = 'jerryin'
         self.password = 'jerryin'
-        self.sms_token = '07cddd262b8f4c5cb4d84227b10ea618'
+        self.sms_token = '5ca1208912d842529cf19f5ab29cc5e7'
         self.key_word = '%E7%BD%91%E6%98%93' # url code for 网易
         self.login_addr = 'http://api.ejiema.com/zc/data.php?code=login&user=' + self.username + '&password=' + self.password
         self.sms_balance_addr = 'http://api.ejiema.com/zc/data.php?code=leftAmount&token=' + self.sms_token # the address get the balance of my account

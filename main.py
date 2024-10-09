@@ -1,5 +1,6 @@
 import sys
-sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+# sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+sys.path.append("../")
 
 from Util.util import Constant, getMilliTime, Buyer, getProxy
 from Util import util

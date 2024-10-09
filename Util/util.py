@@ -1,5 +1,6 @@
 import sys
-sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+# sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+sys.path.append("../")
 
 import time
 import requests
@@ -21,7 +22,7 @@ class ConstantClass(object):
         self.domain = 'https://buff.163.com' # buff domain
         self.ip_check_addr = 'https://icanhazip.com/' # the addr to check if ip works
         # self.home_dir = '/home/jerryin/jupyter_proj/csgo/' # the root addr 
-        self.home_dir = '/Users/yin/Documents/Github/csgo/' # the root addr 
+        self.home_dir = '../' # the root addr 
         self.ip_pool_dir = self.home_dir + 'Ip/ipPool.pkl' # the file address compared to 'the absolute root addr'
         self.account_pool_dir = self.home_dir + 'Account/accountPool.pkl' # the file address compared to 'the absolute root addr'
         self.all_buyers_dir = self.home_dir + 'Account/Buyer/allBuyers.pkl' # the file is an instance, stored all buyer accounts.
