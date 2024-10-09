@@ -1,5 +1,6 @@
 import sys
-sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+# sys.path.append("/home/jerryin/jupyter_proj/csgo/")
+sys.path.append("/Users/yin/Documents/Github/csgo/")
 
 import pandas as pd
 from Util.util import Constant

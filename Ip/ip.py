@@ -7,7 +7,7 @@ from Ip.rawIpPool import raw_ip_pool
 import time
 import requests
 import pickle
-import kdl
+# import kdl
 
 
 def getIps(num: int) -> list:

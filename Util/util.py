@@ -5,7 +5,7 @@ import time
 import requests
 from hyper.contrib import HTTP20Adapter
 import json
-import kdl
+# import kdl
 # Constant = {
 #     'domain': 'https://buff.163.com/', # buff domain
 #     'ip_check_ab_addr': 'https://buff.163.com/', # the addr to check if ip works
@@ -20,7 +20,8 @@ class ConstantClass(object):
 
         self.domain = 'https://buff.163.com' # buff domain
         self.ip_check_addr = 'https://icanhazip.com/' # the addr to check if ip works
-        self.home_dir = '/home/jerryin/jupyter_proj/csgo/' # the root addr 
+        # self.home_dir = '/home/jerryin/jupyter_proj/csgo/' # the root addr 
+        self.home_dir = '/Users/yin/Documents/Github/csgo/' # the root addr 
         self.ip_pool_dir = self.home_dir + 'Ip/ipPool.pkl' # the file address compared to 'the absolute root addr'
         self.account_pool_dir = self.home_dir + 'Account/accountPool.pkl' # the file address compared to 'the absolute root addr'
         self.all_buyers_dir = self.home_dir + 'Account/Buyer/allBuyers.pkl' # the file is an instance, stored all buyer accounts.
@@ -61,8 +62,8 @@ class ConstantClass(object):
         # self.sessions.mount(self.domain, HTTP20Adapter())
         # self.sessions.headers = self.buff_req_headers
 
-        self.auth = kdl.Auth("o81ooetpm0jqbtoauegq", "rc4cbfb9wslxolylje30wgj0q8yqzngz")
-        self.client = kdl.Client(self.auth, timeout=(8, 12), max_retries=3)
+        # self.auth = kdl.Auth("o81ooetpm0jqbtoauegq", "rc4cbfb9wslxolylje30wgj0q8yqzngz")
+        # self.client = kdl.Client(self.auth, timeout=(8, 12), max_retries=3)
         # https://github.com/kuaidaili/python-sdk/tree/master/api-sdk
         
         # self.goods_id = '45237'
